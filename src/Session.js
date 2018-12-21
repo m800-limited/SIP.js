@@ -1104,7 +1104,11 @@ InviteServerContext.prototype = Object.create({}, {
         }
       },
 
-      descriptionCreationFailed = function() {
+      descriptionCreationFailed = function(err) {
+        if (err instanceof SIP.Exceptions.SessionDescriptionHandlerError) {
+            self.logger.log(err.message);
+            self.logger.log(err.error);
+        }
         // TODO: This should check the actual error and make sure it is an
         //        "expected" error. Otherwise it should throw.
         if (self.status === C.STATUS_TERMINATED) {
@@ -1435,7 +1439,11 @@ InviteClientContext.prototype = Object.create({}, {
             self.status = C.STATUS_INVITE_SENT;
             self.send();
           },
-          function onFailure() {
+          function onFailure(err) {
+            if (err instanceof SIP.Exceptions.SessionDescriptionHandlerError) {
+              self.logger.log(err.message);
+              self.logger.log(err.error);
+            }
             if (self.status === C.STATUS_TERMINATED) {
               return;
             }
@@ -1774,6 +1782,10 @@ InviteClientContext.prototype = Object.create({}, {
 
     options.extraHeaders = (options.extraHeaders || []).slice();
 
+    if (this.isCanceled) {
+      throw new SIP.Exceptions.InvalidStateError('CANCELED');
+    }
+
     // Check Session Status
     if (this.status === C.STATUS_TERMINATED || this.status === C.STATUS_CONFIRMED) {
       throw new SIP.Exceptions.InvalidStateError(this.status);
@@ -1781,12 +1793,13 @@ InviteClientContext.prototype = Object.create({}, {
 
     this.logger.log('canceling RTCSession');
 
+    this.isCanceled = true;
+
     var cancel_reason = SIP.Utils.getCancelReason(options.status_code, options.reason_phrase);
 
     // Check Session Status
     if (this.status === C.STATUS_NULL ||
         (this.status === C.STATUS_INVITE_SENT && !this.received_100)) {
-      this.isCanceled = true;
       this.cancelReason = cancel_reason;
     } else if (this.status === C.STATUS_INVITE_SENT ||
                this.status === C.STATUS_1XX_RECEIVED ||
