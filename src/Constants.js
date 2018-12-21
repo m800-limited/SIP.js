@@ -15,6 +15,7 @@ return {
   // SIP scheme
   SIP:  'sip',
   SIPS: 'sips',
+  TEL: 'tel',
 
   // End and Failure causes
   causes: {

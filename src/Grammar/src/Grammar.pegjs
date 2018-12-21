@@ -94,7 +94,12 @@ quoted_pair = "\\" ( [\x00-\x09] / [\x0B-\x0C] / [\x0E-\x7F] )
 // SIP URI
 //=======================
 
-SIP_URI_noparams  = uri_scheme ":"  userinfo ? hostport {
+// [maaii] Make sure parser parse `userinfo` first which is delimited by "@" and fall back to tel
+// which looks for a strict international tel format so that uri with phone number will not always
+// falls into telephone branch, e.g. when user id is in the format of `${phone}@{domain}`
+
+// [maaii] Add support for `tel:+yyyxxxxxxxx` telephone uri
+SIP_URI_noparams  = uri_scheme ":"  (userinfo / tel) ? hostport {
                         options.data.uri = new options.SIP.URI(options.data.scheme, options.data.user, options.data.host, options.data.port);
                         delete options.data.scheme;
                         delete options.data.user;
@@ -103,7 +108,8 @@ SIP_URI_noparams  = uri_scheme ":"  userinfo ? hostport {
                         delete options.data.port;
                       }
 
-SIP_URI         = uri_scheme ":"  userinfo ? hostport uri_parameters headers ? {
+// [maaii] Add support for `tel:+yyyxxxxxxxx` telephone uri
+SIP_URI         = uri_scheme ":"  (userinfo / tel) ? hostport ? uri_parameters ? headers ? {
                         options.data.uri = new options.SIP.URI(options.data.scheme, options.data.user, options.data.host, options.data.port, options.data.uri_params, options.data.uri_headers);
                         delete options.data.scheme;
                         delete options.data.user;
@@ -115,7 +121,11 @@ SIP_URI         = uri_scheme ":"  userinfo ? hostport uri_parameters headers ? {
                         if (options.startRule === 'SIP_URI') { options.data = options.data.uri;}
                       }
 
-uri_scheme      = uri_scheme:  ( "sips"i / "sip"i ) {
+tel             = "+" DIGIT* {
+                    options.data.user = decodeURIComponent(text());
+}
+
+uri_scheme      = uri_scheme:  ( "sips"i / "sip"i / "tel"i ) {
                     options.data.scheme = uri_scheme; }
 
 userinfo        = user (":" password)? "@" {

@@ -23,7 +23,11 @@ URI = function(scheme, user, host, port, parameters, headers) {
 
   // Checks
   if(!host) {
-    throw new TypeError('missing or invalid "host" parameter');
+    if (scheme !== SIP.C.TEL) {
+      throw new TypeError('missing or invalid "host" parameter');
+    } else {
+      host = '';
+    }
   }
 
   // Initialize parameters
