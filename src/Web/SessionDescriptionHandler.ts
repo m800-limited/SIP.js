@@ -313,7 +313,7 @@ export class SessionDescriptionHandler extends EventEmitter implements WebSessio
         this.dtmfSender = senders[0].dtmf;
       }
     }
-    if (!this.dtmfSender && this.hasBrowserTrackSupport()) {
+    if (!this.dtmfSender && this.hasBrowserTrackSupport() && this.hasBrowserGetLocalStreamsSupport()) {
       const streams = (this.peerConnection as any).getLocalStreams();
       if (streams.length > 0) {
         const audioTracks = streams[0].getAudioTracks();
@@ -441,6 +441,10 @@ export class SessionDescriptionHandler extends EventEmitter implements WebSessio
 
   private hasBrowserGetSenderSupport(): boolean {
     return Boolean(this.peerConnection.getSenders);
+  }
+
+  private hasBrowserGetLocalStreamsSupport(): boolean {
+    return Boolean((this.peerConnection as any).getLocalStreams);
   }
 
   private initPeerConnection(options: any = {}): void {
