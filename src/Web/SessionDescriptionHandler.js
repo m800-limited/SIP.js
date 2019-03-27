@@ -270,7 +270,7 @@ SessionDescriptionHandler.prototype = Object.create(SIP.SessionDescriptionHandle
         this.dtmfSender = senders[0].dtmf;
       }
     }
-    if (!this.dtmfSender && this.hasBrowserTrackSupport()) {
+    if (!this.dtmfSender && this.hasBrowserTrackSupport() && this.hasBrowserGetLocalStreamsSupport()) {
       var streams = this.peerConnection.getLocalStreams();
       if (streams.length > 0) {
         var audioTracks = streams[0].getAudioTracks();
@@ -395,6 +395,10 @@ SessionDescriptionHandler.prototype = Object.create(SIP.SessionDescriptionHandle
   hasBrowserGetSenderSupport: {writable: true, value: function hasBrowserGetSenderSupport () {
     return Boolean(this.peerConnection.getSenders);
   }},
+
+  hasBrowserGetLocalStreamsSupport: {writable: true, value: function hasBrowserGetLocalStreamsSupport () {
+    return Boolean(this.peerConnection.getLocalStreams);
+  },
 
   initPeerConnection: {writable: true, value: function initPeerConnection(options) {
     var self = this;
