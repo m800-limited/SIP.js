@@ -398,7 +398,7 @@ SessionDescriptionHandler.prototype = Object.create(SIP.SessionDescriptionHandle
 
   hasBrowserGetLocalStreamsSupport: {writable: true, value: function hasBrowserGetLocalStreamsSupport () {
     return Boolean(this.peerConnection.getLocalStreams);
-  },
+  }},
 
   initPeerConnection: {writable: true, value: function initPeerConnection(options) {
     var self = this;
